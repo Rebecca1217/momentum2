@@ -13,9 +13,9 @@ dataPath = '\\Cj-lmxue-dt\期货数据2.0\dlyData';
 %% 计算因子
 % 这种方法不需要计算因子，只是历史遗留问题，先保留了下面的参数:
 
-factorPara.dataPath = [dataPath, '\主力合约-比例后复权']; % getrawprice还是会用到这个参数
-factorPara.priceType = 'Close';  % 海通和华泰都是复权收盘发信号，主力结算交易；getBasicData以后这个参数也不是用来发信号而只影响计算手数，手数优化以后就不需要了
-% 有了getBasicData以后其实getholdinghands里面的getrawprice可以优化，不需要去原来的地方读取数据了，比较慢
+factorPara.dataPath = [dataPath, '\主力合约']; % getrawprice还是会用到这个参数 计算手数时候用Close，发信号用AdjClose 从getBasicData走不需要这个参数
+factorPara.priceType = 'Close';  % 海通和华泰都是复权收盘发信号，主力结算交易；
+
 
 factorPara.dateFrom = 20100101; 
 factorPara.dateTo = 20180331;
@@ -23,8 +23,8 @@ factorPara.dateTo = 20180331;
 % window = [5:5:50 22 60 120 250]; % 计算动量的时间窗口
 % window = [5 10 22 60 120 250]; % 华泰测试的动量时间窗口 % 感觉250这个根本没有任何道理，资金平均分成250份一天进一份连1手都买不了。。
 % holdingTime = [5 10 22 60 120 250];
-window = [6 90 120 200];
-holdingTime = [6 90 120 200];
+window = [60 90 120 200];
+holdingTime = [60 90 120 200];
 
 tradingPara.groupNum = 5; % 对冲比例10%，20%对应5组
 tradingPara.pct = 0.25; % 高波动率筛选的标准，剔除百分位pctATR以下的
@@ -42,6 +42,7 @@ bcktstAnalysis = num2cell(nan(13, length(window) * length(holdingTime) + 1));
 
 for iWin = 1:length(window) % 每个时间窗口
     for kHolding = 1:length(holdingTime)
+        tic
         tradingPara.win = window(iWin);
         tradingPara.holdingTime = holdingTime(kHolding); % 调仓间隔（持仓日期）
         tradingPara.passway = tradingPara.holdingTime;
@@ -77,15 +78,16 @@ for iWin = 1:length(window) % 每个时间窗口
         % @2018.12.26 不同通道结果结合，用intersect还是比outerjoin略快一点
         % 10条通道的话，intersect 22.78秒，outerjoin 23.08秒，所以还是用intersect做
         %% 每条通道循环测试
+        
         for jPassway = 1 : tradingPara.passway % 每条通道  比较不同通道下的结果
+          
             win = window(iWin);
             passway = jPassway;
+        
             posTradingDirect = getholding(passway); %得到iWin和jPassway下的换仓日序列持仓方向
+          
             % 这个地方有个潜在是问题：持仓矩阵里面的0包含了缺失数据NaN和处于中间位置不多不空两种情况
             % 现在因为不管是哪种情况，不持仓它们先不用管，后期如果需要的话再加以区分（暂时想不到什么情况是需要区分的？）
-            
-            
-            %             posTradingDirect = secondSelect(posTradingDirect1);
             
             % 写一个向下补全的函数，输入换仓日的持仓和目标日期序列，第一个换仓日之前的不管，下面的补齐
             %         posFullDirect = getfullholding(posTradingDirect, factorData.Date);
@@ -112,8 +114,9 @@ for iWin = 1:length(window) % 每个时间窗口
             % 持仓手数和主力合约名称以两个表的形式保存吗？
             % 持仓手数 = (投入本金/持仓品种数)/(合约乘数/ * 价格) 平均分配本金
             % 手数经过最小变动单位向下调整
+           tic
             posHands = getholdinghands(posTradingDirect, posFullDirect, tradingPara.capital / tradingPara.passway);
-            
+            toc
             targetPortfolio = getMainContName(posHands);
             
             % targetPortfolio需要做一个调整：
@@ -153,10 +156,15 @@ for iWin = 1:length(window) % 每个时间窗口
             %         totalBacktestExposure = outerjoin(totalBacktestExposure, array2table(BacktestResult.riskExposure(:, 1:2), 'VariableNames', {'Date', 'Exposure'}), ...
             %             'type', 'left', 'mergekeys', true);
             %         totalBacktestExposure.Properties.VariableNames{jPassway + 1} = ['Exposure', num2str(jPassway)];
-            
+      
         end
         
         % 修改getMainContName函数后，循环通道速度从1条通道38秒提升到10条通道只需要23秒
+        % getpremium增加了时间
+        % @2019.01.07一条通道4.41秒，6条通道22.94秒，优化getrawprice读数
+        % @2019.01.07getrawprice改为getBasicData读取变慢，一条通道要6.3秒。。还是保留getrawprice
+        % 发现原版手数没有按照今日手数表示明日开仓，把这一点调整过来
+        
         
         %% tradingPara.passway条通道的结果结合：
         % 首先这里没有fill previous NaN，因为默认后面不会出现NaN，NaN都是由于passway在一开始造成
@@ -184,7 +192,7 @@ for iWin = 1:length(window) % 每个时间窗口
             bcktstAnalysis(:, (iWin - 1) * length(holdingTime) + kHolding + 1) = ...
                 totalBacktestAnalysis(:, 2);
         end
-        
+        toc
     end
 end
 
