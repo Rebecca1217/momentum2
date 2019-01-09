@@ -8,3 +8,6 @@ momStrategy.m
 第三层循环：jPassway，建仓时间，与换仓周期一致
 最内层循环计算逻辑：getholding，得到iWin和jPassway下的换仓日序列持仓方向；fillmissing填充到posFullDirect；
 getholdinghands得到每日持仓方向和手数；getMainContName得到回测平台输入格式的targetPortfolio，输入回测平台即可。
+
+@2019.1.9 momStrategy.m用的是第一版回测平台；momStrategy2.m用的是第二版回测平台，第二版有点复杂，且测试结果和第一版基本一样
+以后暂时还是用第一版。等时机成熟时候再切换到输入交易单元模式。

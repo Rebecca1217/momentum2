@@ -3,14 +3,8 @@ function res = getBasicData(type)
 % type 取future或spot，目前future的priceType都是Close，没有需求换别的价格，如有需求也比较容易调整
 
 %% 获取code和name 的对应表
+codename = getVarietyCode();
 contPath = 'Z:\baseData';
-load([contPath, '\codeBet.mat']);
-
-code = regexp(codeBet,'\w*(?=\.)','match');
-code = cellfun(@str2double, code);
-name = regexp(codeBet,'(?<=\_).*','match');
-
-codename = table(code, name, 'VariableNames', {'ContCode', 'ContName'});
 if strcmp(type, 'future')
     %% 获取每天的code
     load([contPath, '\TableData\futureData\TableData.mat'])

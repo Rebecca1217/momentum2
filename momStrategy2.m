@@ -1,11 +1,10 @@
 cd 'E:\Repository\momentum2';
-addpath getdata getholding newSystem3.0 newSystem3.0\gen_for_BT2 public
-% @2019.1.9momentum2£¬ĞÂ¶¯Á¿µ¥²ßÂÔÊÕÒæ»Ø³·±È1.14£¨90  60£©
-% momStrategy.mÊÇµÚÒ»°æ»Ø²âÆ½Ì¨ momStrategy2.mÊÇµÚ¶ş°æ»Ø²âÆ½Ì¨
+addpath getdata getholding newSystem3.0 newSystem3.0\gen_for_BT2 public newSystemFunction
+% @2019.1.9momentum2£¬¸üĞÂ»Ø²âÆ½Ì¨ºó£¬ÊÕÒæ»Ø³·±È
+% ÔÚĞÂÆ½Ì¨ÏÂ£¬×îÖÕÊäÈëÂä½Åµã²»ÊÇtargetPortfolio£¬¶øÊÇ³Ö²Ö·½Ïò¾ØÕó£¨»Ø²âÆ½Ì¨Àï»á°´½ğ¶îµÈÈ¨·ÖÅä£©
 
 %% ¶ÁÊı¾İ
 % getBasicDataµÃµ½Ò»¸öÃæ°åtable£¬°üº¬ÈÕÆÚ£¬¸÷Æ·ÖÖÖ÷Á¦ºÏÔ¼Ã¿ÈÕµÄ¸´È¨¼Û¸ñ
-
 % global usualPath
 
 usualPath = '\\Cj-lmxue-dt\ÆÚ»õÊı¾İ2.0\usualData';
@@ -19,7 +18,7 @@ factorPara.dataPath = [dataPath, '\Ö÷Á¦ºÏÔ¼']; % getrawprice»¹ÊÇ»áÓÃµ½Õâ¸ö²ÎÊı ¼
 factorPara.priceType = 'Close';  % º£Í¨ºÍ»ªÌ©¶¼ÊÇ¸´È¨ÊÕÅÌ·¢ĞÅºÅ£¬Ö÷Á¦½áËã½»Ò×£»
 
 
-factorPara.dateFrom = 20100101; 
+factorPara.dateFrom = 20100101;
 factorPara.dateTo = 20180331;
 
 % window = [5:5:50 22 60 120 250]; % ¼ÆËã¶¯Á¿µÄÊ±¼ä´°¿Ú
@@ -44,7 +43,7 @@ bcktstAnalysis = num2cell(nan(13, length(window) * length(holdingTime) + 1));
 
 for iWin = 1:length(window) % Ã¿¸öÊ±¼ä´°¿Ú
     for kHolding = 1:length(holdingTime)
-    
+        
         tradingPara.win = window(iWin);
         tradingPara.holdingTime = holdingTime(kHolding); % µ÷²Ö¼ä¸ô£¨³Ö²ÖÈÕÆÚ£©
         tradingPara.passway = tradingPara.holdingTime;
@@ -80,61 +79,46 @@ for iWin = 1:length(window) % Ã¿¸öÊ±¼ä´°¿Ú
         % @2018.12.26 ²»Í¬Í¨µÀ½á¹û½áºÏ£¬ÓÃintersect»¹ÊÇ±ÈouterjoinÂÔ¿ìÒ»µã
         % 10ÌõÍ¨µÀµÄ»°£¬intersect 22.78Ãë£¬outerjoin 23.08Ãë£¬ËùÒÔ»¹ÊÇÓÃintersect×ö
         %% Ã¿ÌõÍ¨µÀÑ­»·²âÊÔ
-        
+
         for jPassway = 1 : tradingPara.passway % Ã¿ÌõÍ¨µÀ  ±È½Ï²»Í¬Í¨µÀÏÂµÄ½á¹û
-          
+            
             win = window(iWin);
             passway = jPassway;
-        
-            posTradingDirect = getholding(passway); %µÃµ½iWinºÍjPasswayÏÂµÄ»»²ÖÈÕĞòÁĞ³Ö²Ö·½Ïò
-          
-            % Õâ¸öµØ·½ÓĞ¸öÇ±ÔÚÊÇÎÊÌâ£º³Ö²Ö¾ØÕóÀïÃæµÄ0°üº¬ÁËÈ±Ê§Êı¾İNaNºÍ´¦ÓÚÖĞ¼äÎ»ÖÃ²»¶à²»¿ÕÁ½ÖÖÇé¿ö
-            % ÏÖÔÚÒòÎª²»¹ÜÊÇÄÄÖÖÇé¿ö£¬²»³Ö²ÖËüÃÇÏÈ²»ÓÃ¹Ü£¬ºóÆÚÈç¹ûĞèÒªµÄ»°ÔÙ¼ÓÒÔÇø·Ö£¨ÔİÊ±Ïë²»µ½Ê²Ã´Çé¿öÊÇĞèÒªÇø·ÖµÄ£¿£©
             
-            % Ğ´Ò»¸öÏòÏÂ²¹È«µÄº¯Êı£¬ÊäÈë»»²ÖÈÕµÄ³Ö²ÖºÍÄ¿±êÈÕÆÚĞòÁĞ£¬µÚÒ»¸ö»»²ÖÈÕÖ®Ç°µÄ²»¹Ü£¬ÏÂÃæµÄ²¹Æë
-            %         posFullDirect = getfullholding(posTradingDirect, factorData.Date);
-            % ÒòÎªºóÃæµÄËã·¨£¬Âß¼­ÊÇ´ÓÒò×ÓÊı¾İµÄµÚÒ»Ìì¿ªÊ¼»»ÊÖ£¬ËùÒÔÍêÕûµÄ³Ö²ÖÈÕÆÚ¾ÍÊÇÒò×ÓÊı¾İµÄÈÕÆÚ
-            % @2018.12.21¸üĞÂÁËMATLABÒÔºó¿ÉÒÔÓÃfillmissingÁË
+            posTradingDirect = getholding(passway); %µÃµ½iWinºÍjPasswayÏÂµÄ»»²ÖÈÕĞòÁĞ³Ö²Ö·½Ïò
             
             posFullDirect = tradingDay;
             posFullDirect = outerjoin(posFullDirect, posTradingDirect, 'type', 'left', 'MergeKeys', true);
             posFullDirect = varfun(@(x) fillmissing(x, 'previous'), posFullDirect);
             posFullDirect.Properties.VariableNames = posTradingDirect.Properties.VariableNames;
-            
-            % posFullDirectÈ«ÎªNaNÌŞ³ı
-            %         tst = rowfun(@(x) ~all(isnan(x)), posFullDirect(:, 2:end)); % Õâ¸ö²»ĞĞ
-            % ÒòÎªrowfun²»ÊÇ°ÑtableµÄÃ¿Ò»ĞĞ×÷ÎªÒ»¸övectorÒ»ÏÂ×ÓÊäÈëº¯Êı£¬¶øÊÇÃ¿ĞĞµÄÃ¿¸öÔªËØÒ»¸öÒ»¸öÊä½øÈ¥£¬
-            % ËùÒÔÕâÃ´²Ù×÷»áÒ»Ö±ÌáÊ¾ÊäÈëµÄ²ÎÊı¹ı¶à£¬Ïàµ±ÓÚÄãÔÚÊäÈëisnan(1,2,3,4)¶ø²»ÊÇisnan([1 2 3 4])
-            % º¯Êı¶¨ÒåÖ»ÓĞÒ»¸ö²ÎÊıx£¬¶øÄãÊäÈëÁË2:end¸ö²ÎÊı
-            % ¶øvarfunÈ·ÊÇÃ¿ÁĞ×÷ÎªÒ»¸övectorÒ»´ÎĞÔÊäÈëµÄ£¡¿Ó
-            %         tst = arrayfun(@(x) ~all(isnan(table2array(posFullDirect(x,
-            %         2:end)))), 1 : size(posFullDirect)); % Õâ¸ö¿ÉÒÔµ«Ì«Âı
+           
             nonNaN = sum(~isnan(table2array(posFullDirect(:, 2:end))), 2);
             nonNaN = nonNaN ~= 0;
             posFullDirect = posFullDirect(nonNaN, :); % ÕâÑù²Ù×÷ËäÈ»´úÂë·±ËöÒ»µã£¬µ«ËÙ¶È¿ì£¬²»ĞèÒªÓÃarrayfunÕâÖÖ±¾ÖÊÑ­»·µÄ¶«Î÷
-            % ÏÂÃæ²¹È«³Ö²ÖÊÖÊıºÍÖ÷Á¦ºÏÔ¼Ãû³Æ
-            % ³Ö²ÖÊÖÊıºÍÖ÷Á¦ºÏÔ¼Ãû³ÆÒÔÁ½¸ö±íµÄĞÎÊ½±£´æÂğ£¿
-            % ³Ö²ÖÊÖÊı = (Í¶Èë±¾½ğ/³Ö²ÖÆ·ÖÖÊı)/(ºÏÔ¼³ËÊı/ * ¼Û¸ñ) Æ½¾ù·ÖÅä±¾½ğ
-            % ÊÖÊı¾­¹ı×îĞ¡±ä¶¯µ¥Î»ÏòÏÂµ÷Õû
-  
+          
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%ÒÔÏÂÎªĞÂ»Ø²âÆ½Ì¨%%%%%%%%%%%%%%%%%%%%%%
+            % @2019.01.09ĞŞ¸Ä£¬µÃµ½Ã¿ÈÕ³Ö²ÖÆ·ÖÖºÍ·½Ïòºó£¬¼´¿ÉÊäÈë¸üĞÂ»Ø²âÆ½Ì¨£¬»ñÈ¡È¨ÖØ£¬È»ºóÖ±½ÓÊäÈë¼´¿É
+            
+            codename = getVarietyCode();
+            signalSummary = sigTransform(posFullDirect, codename);
+            
+            load('sampleSet.mat')
+            sampleSetI = eval(['sampleSet.','comF']); %Ñù±¾¼¯
+            TableData = getTableData(sampleSetI,'²îÖµºó¸´È¨',[],factorPara.dateTo);
+            %             TableData = getTableDataHedge(TableData,sampleType{ib});
+            
+            %             TableWeight = ptfWeight3(TableData,'eqSize');
+            % ÊÖÊı»¹ÊÇÓÃ×Ô¼º¼ÆËãµÄÊÖÊı£¬µ÷Õû³ÉTableWeightµÄ¸ñÊ½
             posHands = getholdinghands(posTradingDirect, posFullDirect, tradingPara.capital / tradingPara.passway);
-       
-            targetPortfolio = getMainContName(posHands);
-           
-            % targetPortfolioĞèÒª×öÒ»¸öµ÷Õû£º
-            % ´ÓÊ¼ÖÁÖÕ´ÓÀ´Ã»ÓĞ±»Ñ¡ÖĞ¹ıµÄÆ·ÖÖÒªÌßµô¡£¡££¨²»È»»Ø²âÊ±ÊÇÒ»¸öÒ»¸öÆ·ÖÖ²âµÄ£¬²âµ½Õâ¸öÆ·ÖÖÃ»·¨Åª¡£¡££©
-            % ²»Òª¸Ä»Ø²âÆ½Ì¨£¬µ÷Õû×Ô¼ºÊäÈëµÄtargetPortfolio·ûºÏ»Ø²âÆ½Ì¨µÄÒªÇó£¨ÒòÎªÆ½Ì¨²»ÊÇ×Ô¼ºĞ´µÄ£¬ÎªÁË±£³ÖÒ»ÖÂ£©
+            TableWeight = lotsTransform(posHands, codename);
             
-            [BacktestResult,err] = CTABacktest_GeneralPlatform_3(targetPortfolio,tradingPara);
-            %         figure
-            %         % ¾»ÖµÇúÏß
-            %                     dn = datenum(num2str(BacktestResult.nv(:, 1)), 'yyyymmdd');
-            %                     plot(dn, ((tradingPara.capital / tradingPara.passway)  + ...
-            %                         BacktestResult.nv(:, 2)) ./ (tradingPara.capital / tradingPara.passway))
-            %                     datetick('x', 'yyyymmdd', 'keepticks', 'keeplimits')
-            %                     hold on
+            TradePara.PType = 'open';
+            TradePara.float = 2;
+            % »Ø²â
+            BacktestResult = BacktestPlatform_Comb_2(signalSummary,TableWeight,TableData,'future',TradePara,[],[],[],'out');
+            BacktestResult.nv(:, 2) = [];
+            BacktestAnalysis = CTAAnalysis_GeneralPlatform_2_new(BacktestResult);
             
-            BacktestAnalysis = CTAAnalysis_GeneralPlatform_2(BacktestResult);
             if jPassway == 1
                 totalRes(:, [1 2]) = BacktestAnalysis;
             else
@@ -151,22 +135,9 @@ for iWin = 1:length(window) % Ã¿¸öÊ±¼ä´°¿Ú
             [~, idx0, ~] = intersect(totalBacktestNV(:, 1), BacktestResult.nv(:, 1));
             totalBacktestNV(idx0, jPassway + 1) = BacktestResult.nv(:, 2);
             totalBacktestExposure(idx0, jPassway + 1) = BacktestResult.riskExposure(:, 2);
-            % ÏÂÃæ¼¸ĞĞÊÇÓÃouterjoin×ö½á¹û»ã×Ü£º
-            %         totalBacktestNV = outerjoin(totalBacktestNV, array2table(BacktestResult.nv(:, 1:2), 'VariableNames', {'Date', 'NV'}), ...
-            %             'type', 'left', 'mergekeys', true);
-            %         totalBacktestNV.Properties.VariableNames{jPassway + 1} = ['NV', num2str(jPassway)];
-            %         totalBacktestExposure = outerjoin(totalBacktestExposure, array2table(BacktestResult.riskExposure(:, 1:2), 'VariableNames', {'Date', 'Exposure'}), ...
-            %             'type', 'left', 'mergekeys', true);
-            %         totalBacktestExposure.Properties.VariableNames{jPassway + 1} = ['Exposure', num2str(jPassway)];
-      
+         
         end
-        
-        % ĞŞ¸ÄgetMainContNameº¯Êıºó£¬Ñ­»·Í¨µÀËÙ¶È´Ó1ÌõÍ¨µÀ38ÃëÌáÉıµ½10ÌõÍ¨µÀÖ»ĞèÒª23Ãë
-        % getpremiumÔö¼ÓÁËÊ±¼ä
-        % @2019.01.07Ò»ÌõÍ¨µÀ4.41Ãë£¬6ÌõÍ¨µÀ22.94Ãë£¬ÓÅ»¯getrawprice¶ÁÊı
-        % @2019.01.07getrawprice¸ÄÎªgetBasicData¶ÁÈ¡±äÂı£¬Ò»ÌõÍ¨µÀÒª6.3Ãë¡£¡£»¹ÊÇ±£Áôgetrawprice
-        % ·¢ÏÖÔ­°æÊÖÊıÃ»ÓĞ°´ÕÕ½ñÈÕÊÖÊı±íÊ¾Ã÷ÈÕ¿ª²Ö£¬°ÑÕâÒ»µãµ÷Õû¹ıÀ´
-        
+    
         
         %% tradingPara.passwayÌõÍ¨µÀµÄ½á¹û½áºÏ£º
         % Ê×ÏÈÕâÀïÃ»ÓĞfill previous NaN£¬ÒòÎªÄ¬ÈÏºóÃæ²»»á³öÏÖNaN£¬NaN¶¼ÊÇÓÉÓÚpasswayÔÚÒ»¿ªÊ¼Ôì³É
@@ -194,13 +165,9 @@ for iWin = 1:length(window) % Ã¿¸öÊ±¼ä´°¿Ú
             bcktstAnalysis(:, (iWin - 1) * length(holdingTime) + kHolding + 1) = ...
                 totalBacktestAnalysis(:, 2);
         end
-     
+        
     end
 end
 
-% % ±£´æĞÂ¶¯Á¿½á¹û
-% bctNV =  totalBacktestResult.nv;
-% bctexp = totalBacktestResult.riskExposure;
-% xlswrite('C:\Users\fengruiling\Desktop\bctNV.xlsx', bctNV);
-% xlswrite('C:\Users\fengruiling\Desktop\bctexp.xlsx', bctexp);
+
 
