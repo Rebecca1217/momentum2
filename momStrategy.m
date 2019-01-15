@@ -3,6 +3,7 @@ addpath getdata getholding newSystem3.0 newSystem3.0\gen_for_BT2 public
 % @2019.1.9momentum2£¬ĞÂ¶¯Á¿µ¥²ßÂÔÊÕÒæ»Ø³·±È1.14£¨90  60£©
 % momStrategy.mÊÇµÚÒ»°æ»Ø²âÆ½Ì¨ momStrategy2.mÊÇµÚ¶ş°æ»Ø²âÆ½Ì¨
 
+
 %% ¶ÁÊı¾İ
 % getBasicDataµÃµ½Ò»¸öÃæ°åtable£¬°üº¬ÈÕÆÚ£¬¸÷Æ·ÖÖÖ÷Á¦ºÏÔ¼Ã¿ÈÕµÄ¸´È¨¼Û¸ñ
 
@@ -19,14 +20,15 @@ factorPara.dataPath = [dataPath, '\Ö÷Á¦ºÏÔ¼']; % getrawprice»¹ÊÇ»áÓÃµ½Õâ¸ö²ÎÊı ¼
 factorPara.priceType = 'Close';  % º£Í¨ºÍ»ªÌ©¶¼ÊÇ¸´È¨ÊÕÅÌ·¢ĞÅºÅ£¬Ö÷Á¦½áËã½»Ò×£»
 
 
-factorPara.dateFrom = 20100101; 
-factorPara.dateTo = 20180331;
-
 % window = [5:5:50 22 60 120 250]; % ¼ÆËã¶¯Á¿µÄÊ±¼ä´°¿Ú
 % window = [5 10 22 60 120 250]; % »ªÌ©²âÊÔµÄ¶¯Á¿Ê±¼ä´°¿Ú % ¸Ğ¾õ250Õâ¸ö¸ù±¾Ã»ÓĞÈÎºÎµÀÀí£¬×Ê½ğÆ½¾ù·Ö³É250·İÒ»Ìì½øÒ»·İÁ¬1ÊÖ¶¼Âò²»ÁË¡£¡£
 % holdingTime = [5 10 22 60 120 250];
-window = [5 10 20 30 60 90 120 200];
-holdingTime = [5 10 20 30 60 90 120 200];
+% window = 45:5:90; % ÕâÊÇ¼ÆËã²¨¶¯ÂÊµÄ´°¿Ú£¬ºÍÊÕÒæÂÊ¶¯Á¿Òò×ÓÎŞ¹Ø
+% holdingTime = 50:5:60;
+% window = [30 50 60 90];
+% holdingTime = [30 50 60];
+window = 90;
+holdingTime = 60;
 
 tradingPara.groupNum = 5; % ¶Ô³å±ÈÀı10%£¬20%¶ÔÓ¦5×é
 tradingPara.pct = 0.25; % ¸ß²¨¶¯ÂÊÉ¸Ñ¡µÄ±ê×¼£¬ÌŞ³ı°Ù·ÖÎ»pctATRÒÔÏÂµÄ
@@ -39,6 +41,14 @@ tradingPara.futMultiPath = '\\Cj-lmxue-dt\ÆÚ»õÊı¾İ2.0\usualData\PunitInfo'; %ÆÚ»
 tradingPara.PType = 'open'; %½»Ò×¼Û¸ñ£¬Ò»°ãÓÃopen£¨¿ªÅÌ¼Û£©»òÕßavg(ÈÕ¾ù¼Û£©
 tradingPara.fixC = 0.0002; %¹Ì¶¨³É±¾ »ªÌ©ÊÇµ¥±ßÍòÎå£¬º£Í¨µ¥±ßÍòÈı
 tradingPara.slip = 2; %»¬µã Á½¼ÒÈ¯ÉÌ¶¼²»¼Ó»¬µã
+
+
+% dateFromS = [20080101 20090101 20100101 20110101 20120101 20130101 20140101 20150101 20160101 20170101 20180101];
+% dateToS = [20081231 20091231 20101231 20111231 20121231 20131231 20141231 20151231 20161231 20171231 20181231];
+% dateBacktst = num2cell(nan(13, length(dateFromS) + 1));
+% for iDate = 1 : length(dateFromS)
+factorPara.dateFrom = 20180301; 
+factorPara.dateTo = 20190114;
 
 bcktstAnalysis = num2cell(nan(13, length(window) * length(holdingTime) + 1));
 
@@ -87,8 +97,12 @@ for iWin = 1:length(window) % Ã¿¸öÊ±¼ä´°¿Ú
             passway = jPassway;
         
             posTradingDirect = getholding(passway); %µÃµ½iWinºÍjPasswayÏÂµÄ»»²ÖÈÕĞòÁĞ³Ö²Ö·½Ïò
-          
-            % Õâ¸öµØ·½ÓĞ¸öÇ±ÔÚÊÇÎÊÌâ£º³Ö²Ö¾ØÕóÀïÃæµÄ0°üº¬ÁËÈ±Ê§Êı¾İNaNºÍ´¦ÓÚÖĞ¼äÎ»ÖÃ²»¶à²»¿ÕÁ½ÖÖÇé¿ö
+            % 2019.1.10 posTradingDirectÀïÃæÈ«ÊÇNaNµÄÒªÈ¥µô£¬²»È»Ó°ÏìºóÃæ¼ÆËã³Ö²ÖÆ·ÖÖ¸öÊı£¬Ã¿¸öµÄ×Ê½ğ·ÖÅäµÈ
+%             posTradingDirect = delNaN(posTradingDirect);
+%             delVar = {'M', 'P', 'RM', 'ZN', 'ZC', 'MA', 'PP', 'BU', 'NI', 'L', 'RB', 'SR', 'TA', 'HC'};
+%             colIdx = ismember(posTradingDirect.Properties.VariableNames, delVar);
+%             posTradingDirect(posTradingDirect.Date == 20181019, colIdx) = array2table(nan(1, length(delVar)));
+%             % Õâ¸öµØ·½ÓĞ¸öÇ±ÔÚÊÇÎÊÌâ£º³Ö²Ö¾ØÕóÀïÃæµÄ0°üº¬ÁËÈ±Ê§Êı¾İNaNºÍ´¦ÓÚÖĞ¼äÎ»ÖÃ²»¶à²»¿ÕÁ½ÖÖÇé¿ö
             % ÏÖÔÚÒòÎª²»¹ÜÊÇÄÄÖÖÇé¿ö£¬²»³Ö²ÖËüÃÇÏÈ²»ÓÃ¹Ü£¬ºóÆÚÈç¹ûĞèÒªµÄ»°ÔÙ¼ÓÒÔÇø·Ö£¨ÔİÊ±Ïë²»µ½Ê²Ã´Çé¿öÊÇĞèÒªÇø·ÖµÄ£¿£©
             
             % Ğ´Ò»¸öÏòÏÂ²¹È«µÄº¯Êı£¬ÊäÈë»»²ÖÈÕµÄ³Ö²ÖºÍÄ¿±êÈÕÆÚĞòÁĞ£¬µÚÒ»¸ö»»²ÖÈÕÖ®Ç°µÄ²»¹Ü£¬ÏÂÃæµÄ²¹Æë
@@ -102,6 +116,7 @@ for iWin = 1:length(window) % Ã¿¸öÊ±¼ä´°¿Ú
             posFullDirect.Properties.VariableNames = posTradingDirect.Properties.VariableNames;
             
             % posFullDirectÈ«ÎªNaNÌŞ³ı
+            posFullDirect = delNaN(posFullDirect);
             %         tst = rowfun(@(x) ~all(isnan(x)), posFullDirect(:, 2:end)); % Õâ¸ö²»ĞĞ
             % ÒòÎªrowfun²»ÊÇ°ÑtableµÄÃ¿Ò»ĞĞ×÷ÎªÒ»¸övectorÒ»ÏÂ×ÓÊäÈëº¯Êı£¬¶øÊÇÃ¿ĞĞµÄÃ¿¸öÔªËØÒ»¸öÒ»¸öÊä½øÈ¥£¬
             % ËùÒÔÕâÃ´²Ù×÷»áÒ»Ö±ÌáÊ¾ÊäÈëµÄ²ÎÊı¹ı¶à£¬Ïàµ±ÓÚÄãÔÚÊäÈëisnan(1,2,3,4)¶ø²»ÊÇisnan([1 2 3 4])
@@ -109,9 +124,7 @@ for iWin = 1:length(window) % Ã¿¸öÊ±¼ä´°¿Ú
             % ¶øvarfunÈ·ÊÇÃ¿ÁĞ×÷ÎªÒ»¸övectorÒ»´ÎĞÔÊäÈëµÄ£¡¿Ó
             %         tst = arrayfun(@(x) ~all(isnan(table2array(posFullDirect(x,
             %         2:end)))), 1 : size(posFullDirect)); % Õâ¸ö¿ÉÒÔµ«Ì«Âı
-            nonNaN = sum(~isnan(table2array(posFullDirect(:, 2:end))), 2);
-            nonNaN = nonNaN ~= 0;
-            posFullDirect = posFullDirect(nonNaN, :); % ÕâÑù²Ù×÷ËäÈ»´úÂë·±ËöÒ»µã£¬µ«ËÙ¶È¿ì£¬²»ĞèÒªÓÃarrayfunÕâÖÖ±¾ÖÊÑ­»·µÄ¶«Î÷
+            
             % ÏÂÃæ²¹È«³Ö²ÖÊÖÊıºÍÖ÷Á¦ºÏÔ¼Ãû³Æ
             % ³Ö²ÖÊÖÊıºÍÖ÷Á¦ºÏÔ¼Ãû³ÆÒÔÁ½¸ö±íµÄĞÎÊ½±£´æÂğ£¿
             % ³Ö²ÖÊÖÊı = (Í¶Èë±¾½ğ/³Ö²ÖÆ·ÖÖÊı)/(ºÏÔ¼³ËÊı/ * ¼Û¸ñ) Æ½¾ù·ÖÅä±¾½ğ
@@ -126,14 +139,14 @@ for iWin = 1:length(window) % Ã¿¸öÊ±¼ä´°¿Ú
             % ²»Òª¸Ä»Ø²âÆ½Ì¨£¬µ÷Õû×Ô¼ºÊäÈëµÄtargetPortfolio·ûºÏ»Ø²âÆ½Ì¨µÄÒªÇó£¨ÒòÎªÆ½Ì¨²»ÊÇ×Ô¼ºĞ´µÄ£¬ÎªÁË±£³ÖÒ»ÖÂ£©
             
             [BacktestResult,err] = CTABacktest_GeneralPlatform_3(targetPortfolio,tradingPara);
-            %         figure
-            %         % ¾»ÖµÇúÏß
-            %                     dn = datenum(num2str(BacktestResult.nv(:, 1)), 'yyyymmdd');
-            %                     plot(dn, ((tradingPara.capital / tradingPara.passway)  + ...
-            %                         BacktestResult.nv(:, 2)) ./ (tradingPara.capital / tradingPara.passway))
-            %                     datetick('x', 'yyyymmdd', 'keepticks', 'keeplimits')
-            %                     hold on
-            
+%             %         figure
+%                     % ¾»ÖµÇúÏß
+%                                 dn = datenum(num2str(BacktestResult.nv(:, 1)), 'yyyymmdd');
+%                                 plot(dn, ((tradingPara.capital / tradingPara.passway)  + ...
+%                                     BacktestResult.nv(:, 2)) ./ (tradingPara.capital / tradingPara.passway))
+%                                 datetick('x', 'yyyymmdd', 'keepticks', 'keeplimits')
+%                                 hold on
+%             
             BacktestAnalysis = CTAAnalysis_GeneralPlatform_2(BacktestResult);
             if jPassway == 1
                 totalRes(:, [1 2]) = BacktestAnalysis;
@@ -197,7 +210,14 @@ for iWin = 1:length(window) % Ã¿¸öÊ±¼ä´°¿Ú
      
     end
 end
-
+% 
+% if iDate == 1
+%     dateBacktst(:, [1 2]) = bcktstAnalysis;
+% else
+%     dateBacktst(:, iDate + 1) = BacktestAnalysis(:, 2);
+% end
+% 
+% end
 % % ±£´æĞÂ¶¯Á¿½á¹û
 % bctNV =  totalBacktestResult.nv;
 % bctexp = totalBacktestResult.riskExposure;

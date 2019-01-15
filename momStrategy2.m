@@ -1,6 +1,6 @@
 cd 'E:\Repository\momentum2';
 addpath getdata getholding newSystem3.0 newSystem3.0\gen_for_BT2 public newSystemFunction
-% @2019.1.9momentum2，更新回测平台后，收益回撤比
+% @2019.1.9momentum2，更新回测平台后，收益回撤比1.12
 % 在新平台下，最终输入落脚点不是targetPortfolio，而是持仓方向矩阵（回测平台里会按金额等权分配）
 
 %% 读数据

@@ -1,4 +1,4 @@
-function res = getholding(passway)
+function res = getholdingSampleOut(passway)
 %得到每期持仓品种和方向
 % 先得到换仓日的，然后填充到中间的每天得到完整的持仓品种和方向，
 % 之后再考虑手数和合约名字的问题
@@ -16,7 +16,8 @@ tradingDate = tradingDate(tradingIndex);
 % iWin = 1, passway = 1时，从因子出现的第一天就开始配置
 
 % 换仓日的现货溢价因子数据
-resTrading = getPremium(factorPara.dateFrom, factorPara.dateTo); % 现货/期货结果，如果因子>1则做多，因子<1则做空
+resTrading = evalin('base', 'premium');
+% resTrading = getPremium(factorPara.dateFrom, factorPara.dateTo); % 现货/期货结果，如果因子>1则做多，因子<1则做空
 % 换仓日的信号
 resTrading = array2table([resTrading.Date, ...
     arrayfun(@(x, y, z) ifelse(isnan(x), NaN, ifelse(x > 1, 1, -1)), table2array(resTrading(:, 2:end)))], ...

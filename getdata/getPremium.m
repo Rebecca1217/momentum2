@@ -1,6 +1,8 @@
-function res = getPremium()
+function res = getPremium(dateFrom, dateTo)
 %GETPREMIUM 得到的是全部时间的现货溢价数据
 % spot/future， ＞1表示现货溢价，＜1表示期货溢价
+
+tradingDay = gettradingday(dateFrom, dateTo);
 
 % 注：现货数据有个问题，不全，不能两个矩阵直接对应相除，所以采用outerjoin的形式
 %% 期货数据
@@ -24,6 +26,6 @@ res = table(res.Date, res.ContName, res.SpotPremium, ...
 res = unstack(res, 'SpotPremium', 'ContName');
 res = delStockBondIdx(res);
 
-
+res = outerjoin(tradingDay, res, 'type', 'left', 'MergeKeys', true);
 end
 

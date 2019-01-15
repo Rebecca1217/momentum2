@@ -11,3 +11,5 @@ getholdinghands得到每日持仓方向和手数；getMainContName得到回测平台输入格式的targ
 
 @2019.1.9 momStrategy.m用的是第一版回测平台；momStrategy2.m用的是第二版回测平台，第二版有点复杂，且测试结果和第一版基本一样
 以后暂时还是用第一版。等时机成熟时候再切换到输入交易单元模式。
+@2019.1.14 样本外跟踪，数据必须一天一更新，不能动以前的数据。sampleOut/getDlyData获取每日数据，sampleOut/dlyDataSave存储每日数据。
+数据存在dlyData中，样本外回测数据由拼接，测试输出结果

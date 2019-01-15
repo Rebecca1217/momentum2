@@ -27,11 +27,13 @@ dataPara.priceType = factorPara.priceType;
 % 原始版本有个问题，当天的手数用上一天的收盘价取计算的
 % 其实和漫雪回测一致的版本应该是本行记录的是本日收盘价计算的手数，表示的是下一天应开仓的手数
 % 这样的话就不存在换月日当天换仓，合约代码需要往前错位一天的问题了
-priceData = getpricedata(dataPara); %2019.01.07 原始版本：保留的是主力复权价格，这计算手数是不是应该用主力价格？
+priceData = getpricedata(dataPara); %2019.01.07 原始版本：保留的是主力复权价格，这计算手数是不是应该用主力价格？ 是的
 % 这个地方priceData要保留比dateFrom稍往前一点，因为需要上一个交易日的价格来确定调仓日手数。20190107修改后不用
 % 第一天就是调仓日的话，priceData需要保留第一天往前一个交易日的价格信息
 % priceData = priceData(priceData.Date >= min(posFullDirect.Date) & ...
 %     priceData.Date <= max(posFullDirect.Date), :);
+
+% @2019.1.15这个getholdinghands用的是期货数据2.0里面的dlyData，这个每天更新，不动原始的，只是每天新加，可以用于样本外
 
 
 % load 合约乘数 unitInfo 和 liquidInfo一样，每天晚上更新table数据，用的时候load就可以了
