@@ -3,6 +3,11 @@ function res = getPremium(dateFrom, dateTo)
 % spot/future， ＞1表示现货溢价，＜1表示期货溢价
 
 tradingDay = gettradingday(dateFrom, dateTo);
+if isempty(tradingDay)
+    disp('Date in Z:\baseData\Tdays has not been updated! Stop here.')
+    res = table.empty(0, 50);
+    return 
+end
 
 % 注：现货数据有个问题，不全，不能两个矩阵直接对应相除，所以采用outerjoin的形式
 %% 期货数据

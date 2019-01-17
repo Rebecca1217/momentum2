@@ -12,6 +12,12 @@ end
 % 现货溢价比例数据
 % 只有这一个函数是可以直接dateFrom = dateTo = dateInput这样操作
 dataPrem = getPremium(dateInput, dateInput);
+if isempty(dataPrem)
+    disp('Could''nt fetch spotData because Tdays update hanged.')
+    res = table.empty(0, 5);
+    return
+end
+
 dataPrem = table(transpose(dataPrem.Properties.VariableNames(2:end)), ...
     transpose(table2array(dataPrem(:, 2:end))), ...
     'VariableNames', {'Variety', 'Premium'});

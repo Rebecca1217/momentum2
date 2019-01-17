@@ -1,5 +1,6 @@
 cd 'E:\Repository\momentum2';
-addpath getdata getholding newSystem3.0 newSystem3.0\gen_for_BT2 public
+addpath getdata getholding newSystem3.0 newSystem3.0\gen_for_BT2 public sampleOut
+
 % 样本外跟踪，数据读取和历史回测数据读取不太一样，其他一样。
 
 %% 读数据
@@ -41,6 +42,9 @@ tradingPara.win = window;
 tradingPara.holdingTime = holdingTime; % 调仓间隔（持仓日期）
 tradingPara.passway = tradingPara.holdingTime;
 tradingDay = gettradingday(factorPara.dateFrom, factorPara.dateTo);
+if tradingDay.Date(end) < factorPara.dateTo
+    error('Stop because Tdays has not been updated.')
+end
 %         load([factorDataPath, factorName, '\window', num2str(window(iWin)), '.mat']);
 %         %% 因子数据筛选：第一：日期
 %         factorData = factorData(factorData.Date >= factorPara.dateFrom & ...
@@ -50,6 +54,10 @@ tradingDay = gettradingday(factorPara.dateFrom, factorPara.dateTo);
 %% liquidityInfo和volatilityInfo一次性读取，每个passway从外面复制即可，不要每循环一次获取一次
 
 run('.\sampleOut\dataBind.m')
+clear fileName
+if totalData.Date(end) < tradingDay.Date(end)
+    error('totalData has not been updated to latest.')
+end
 % 往前更新了2年的数据，因为策略参数窗口比较长，存储长一点数据备用
 % 流动性、现货溢价、波动率数据都来自于totalData(每日更新数据合成的)
 
