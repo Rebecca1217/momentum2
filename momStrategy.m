@@ -6,7 +6,6 @@ addpath getdata getholding newSystem3.0 newSystem3.0\gen_for_BT2 public
 
 %% 读数据
 % getBasicData得到一个面板table，包含日期，各品种主力合约每日的复权价格
-
 % global usualPath
 
 usualPath = '\\Cj-lmxue-dt\期货数据2.0\usualData';
@@ -47,8 +46,8 @@ tradingPara.slip = 2; %滑点 两家券商都不加滑点
 % dateToS = [20081231 20091231 20101231 20111231 20121231 20131231 20141231 20151231 20161231 20171231 20181231];
 % dateBacktst = num2cell(nan(13, length(dateFromS) + 1));
 % for iDate = 1 : length(dateFromS)
-factorPara.dateFrom = 20180301; 
-factorPara.dateTo = 20190114;
+factorPara.dateFrom = 20100101; 
+factorPara.dateTo = 20180831;
 
 bcktstAnalysis = num2cell(nan(13, length(window) * length(holdingTime) + 1));
 
@@ -59,20 +58,20 @@ for iWin = 1:length(window) % 每个时间窗口
         tradingPara.holdingTime = holdingTime(kHolding); % 调仓间隔（持仓日期）
         tradingPara.passway = tradingPara.holdingTime;
         tradingDay = gettradingday(factorPara.dateFrom, factorPara.dateTo);
-        %         load([factorDataPath, factorName, '\window', num2str(window(iWin)), '.mat']);
-        %         %% 因子数据筛选：第一：日期
-        %         factorData = factorData(factorData.Date >= factorPara.dateFrom & ...
-        %             factorData.Date <= factorPara.dateTo, :);
-        % 因子数据筛选：第二：流动性
+%         load([factorDataPath, factorName, '\ window', num2str(window(iWin)), '.mat']);
+%         %% 因子数据筛选：第一：日期
+%         factorData = factorData(factorData.Date >= factorPara.dateFrom & ...
+%             factorData.Date <= factorPara.dateTo, :);
+        %% 因子数据筛选：第二：流动性
         %     每次循环的liquidityInfo时间不一样，与factorData的时间保持一致
-        %% liquidityInfo和volatilityInfo一次性读取，每个passway从外面复制即可，不要每循环一次获取一次
+        % liquidityInfo和volatilityInfo一次性读取，每个passway从外面复制即可，不要每循环一次获取一次
         load('E:\futureData\liquidityInfoHuatai.mat') % 用华泰的流动性筛选标准
         liquidityInfo = liquidityInfoHuatai;
         liquidityInfo = liquidityInfo(...
             liquidityInfo.Date >= tradingDay.Date(1) &...
             liquidityInfo.Date <= tradingDay.Date(end), :);
         % @2018.12.24 liquidityInfo也要剔除股指和国债期货
-        % 因子数据筛选：第三：纯商品部分
+        %% 因子数据筛选数据：第三：纯商品部分 波动率数据
         %         liquidityInfo = delStockBondIdx(liquidityInfo); %% 这一步其实不用，因为Huatai版本已经剔除了股指和国债期货
         
         volatilityInfo = getVolatility(tradingPara.win, tradingPara.pct, tradingDay.Date(1), tradingDay.Date(end), 'sigma');

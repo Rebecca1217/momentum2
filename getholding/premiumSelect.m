@@ -3,7 +3,7 @@ function res = premiumSelect(momRes)
 
 %% 计算各品种现货溢价数值
 % getPremium
-res = getPremium();
+res = getPremium(momRes.Date(1), momRes.Date(end));
 [~, idx, ~] = intersect(res.Date, momRes.Date);
 res = res(idx, :);
 

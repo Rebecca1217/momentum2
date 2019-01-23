@@ -59,8 +59,11 @@ res = [resTrading.Date, res]; % 流动性 & 高波动率品种的每日因子数据
 
 res = array2table(res, 'VariableNames', resTrading.Properties.VariableNames);
 
-% % 现货溢价筛选
-% res = premiumSelect(res);
+% 现货溢价筛选
+res = premiumSelect(res);
+
+% MACD筛选  做多品种中只保留MACD最小的1/5组，做空品种不处理
+res = MACDSelect(res, 5); % MACD是倒序排的，所以选择秩最大的1/5
 
 % % 因子绝对值筛选
 % res = factorSelect(res);
