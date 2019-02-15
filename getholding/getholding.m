@@ -1,4 +1,4 @@
-function res = getholding(passway)
+function res = getholding(passway, tradingPara)
 %得到每期持仓品种和方向
 % 先得到换仓日的，然后填充到中间的每天得到完整的持仓品种和方向，
 % 之后再考虑手数和合约名字的问题
@@ -11,7 +11,8 @@ holdingTime = evalin('base', 'tradingPara.holdingTime');
 tradingDay = evalin('base', 'tradingDay');
 factorPara = evalin('base', 'factorPara');
 tradingDate = tradingDay.Date;
-tradingIndex = (passway:holdingTime:size(tradingDay, 1));
+tradingIndex = ((tradingPara.passwayInterval * (passway - 1)) + 1:holdingTime:size(tradingDay, 1));
+% tradingIndex = (passway:holdingTime:size(tradingDay, 1));
 tradingDate = tradingDate(tradingIndex);
 % iWin = 1, passway = 1时，从因子出现的第一天就开始配置
 
@@ -59,11 +60,13 @@ res = [resTrading.Date, res]; % 流动性 & 高波动率品种的每日因子数据
 
 res = array2table(res, 'VariableNames', resTrading.Properties.VariableNames);
 
-% 现货溢价筛选
-res = premiumSelect(res);
+% % 现货溢价筛选
+% res = premiumSelect(res); %
+% premiumSelect输入参数是momRes，即纯动量策略的Res，不是各种已经筛选过的，不然会覆盖之前
 
-% MACD筛选  做多品种中只保留MACD最小的1/5组，做空品种不处理
-res = MACDSelect(res, 5); % MACD是倒序排的，所以选择秩最大的1/5
+% % MACD筛选  做多品种中只保留MACD最小的1/5组，做空品种不处理
+% res = MACDSelect(res, 5); % MACD是倒序排的，所以选择秩最大的1/5
+% 加MACD限制条件效果变差（收益变大，回撤变更大）
 
 % % 因子绝对值筛选
 % res = factorSelect(res);

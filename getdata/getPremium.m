@@ -17,7 +17,7 @@ future = table(future.Date, future.ContName, future.Close, ...
 future.ContName = cellfun(@char, future.ContName, 'UniformOutput', false);
 
 %% 现货数据
-spot = getBasicData('spot');
+spot = getBasicData('spot', 'v1');
 spot = table(spot.Date, spot.ContName, spot.SpotPrice, ...
     'VariableNames', {'Date', 'ContName', 'SpotPrice'});
 spot.ContName = cellfun(@char, spot.ContName, 'UniformOutput', false);

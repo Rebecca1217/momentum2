@@ -29,7 +29,7 @@ factorPara.priceType = 'Close';  % 海通和华泰都是复权收盘发信号，主力结算交易；
 window = 90;
 holdingTime = 60;
 
-tradingPara.groupNum = 5; % 对冲比例10%，20%对应5组
+% tradingPara.groupNum = 5; % 对冲比例10%，20%对应5组
 tradingPara.pct = 0.25; % 高波动率筛选的标准，剔除百分位pctATR以下的
 tradingPara.capital = 1e8; % 因为要均分60组分批建仓，1000万不够分
 % tradePara.futUnitPath = '\\Cj-lmxue-dt\期货数据2.0\usualData\minTickInfo.mat'; %期货最小变动单位
@@ -46,22 +46,28 @@ tradingPara.slip = 2; %滑点 两家券商都不加滑点
 % dateToS = [20081231 20091231 20101231 20111231 20121231 20131231 20141231 20151231 20161231 20171231 20181231];
 % dateBacktst = num2cell(nan(13, length(dateFromS) + 1));
 % for iDate = 1 : length(dateFromS)
-factorPara.dateFrom = 20100101; 
-factorPara.dateTo = 20180831;
+factorPara.dateFrom = 20100101;
+factorPara.dateTo = 20181231;
 
 bcktstAnalysis = num2cell(nan(13, length(window) * length(holdingTime) + 1));
 
 for iWin = 1:length(window) % 每个时间窗口
     for kHolding = 1:length(holdingTime)
-    
+        
         tradingPara.win = window(iWin);
         tradingPara.holdingTime = holdingTime(kHolding); % 调仓间隔（持仓日期）
-        tradingPara.passway = tradingPara.holdingTime;
+                if tradingPara.holdingTime <= 30
+                    tradingPara.passwayInterval = 2;
+                else
+                    tradingPara.passwayInterval = 1;
+                end
+                tradingPara.passway = floor(tradingPara.holdingTime / tradingPara.passwayInterval); % 通道数
+%         tradingPara.passway = tradingPara.holdingTime;
         tradingDay = gettradingday(factorPara.dateFrom, factorPara.dateTo);
-%         load([factorDataPath, factorName, '\ window', num2str(window(iWin)), '.mat']);
-%         %% 因子数据筛选：第一：日期
-%         factorData = factorData(factorData.Date >= factorPara.dateFrom & ...
-%             factorData.Date <= factorPara.dateTo, :);
+        %         load([factorDataPath, factorName, '\ window', num2str(window(iWin)), '.mat']);
+        %         %% 因子数据筛选：第一：日期
+        %         factorData = factorData(factorData.Date >= factorPara.dateFrom & ...
+        %             factorData.Date <= factorPara.dateTo, :);
         %% 因子数据筛选：第二：流动性
         %     每次循环的liquidityInfo时间不一样，与factorData的时间保持一致
         % liquidityInfo和volatilityInfo一次性读取，每个passway从外面复制即可，不要每循环一次获取一次
@@ -91,17 +97,17 @@ for iWin = 1:length(window) % 每个时间窗口
         %% 每条通道循环测试
         
         for jPassway = 1 : tradingPara.passway % 每条通道  比较不同通道下的结果
-          
+            
             win = window(iWin);
             passway = jPassway;
-        
-            posTradingDirect = getholding(passway); %得到iWin和jPassway下的换仓日序列持仓方向
+            
+            posTradingDirect = getholding(passway, tradingPara); %得到iWin和jPassway下的换仓日序列持仓方向
             % 2019.1.10 posTradingDirect里面全是NaN的要去掉，不然影响后面计算持仓品种个数，每个的资金分配等
-%             posTradingDirect = delNaN(posTradingDirect);
-%             delVar = {'M', 'P', 'RM', 'ZN', 'ZC', 'MA', 'PP', 'BU', 'NI', 'L', 'RB', 'SR', 'TA', 'HC'};
-%             colIdx = ismember(posTradingDirect.Properties.VariableNames, delVar);
-%             posTradingDirect(posTradingDirect.Date == 20181019, colIdx) = array2table(nan(1, length(delVar)));
-%             % 这个地方有个潜在是问题：持仓矩阵里面的0包含了缺失数据NaN和处于中间位置不多不空两种情况
+            %             posTradingDirect = delNaN(posTradingDirect);
+            %             delVar = {'M', 'P', 'RM', 'ZN', 'ZC', 'MA', 'PP', 'BU', 'NI', 'L', 'RB', 'SR', 'TA', 'HC'};
+            %             colIdx = ismember(posTradingDirect.Properties.VariableNames, delVar);
+            %             posTradingDirect(posTradingDirect.Date == 20181019, colIdx) = array2table(nan(1, length(delVar)));
+            %             % 这个地方有个潜在是问题：持仓矩阵里面的0包含了缺失数据NaN和处于中间位置不多不空两种情况
             % 现在因为不管是哪种情况，不持仓它们先不用管，后期如果需要的话再加以区分（暂时想不到什么情况是需要区分的？）
             
             % 写一个向下补全的函数，输入换仓日的持仓和目标日期序列，第一个换仓日之前的不管，下面的补齐
@@ -128,24 +134,24 @@ for iWin = 1:length(window) % 每个时间窗口
             % 持仓手数和主力合约名称以两个表的形式保存吗？
             % 持仓手数 = (投入本金/持仓品种数)/(合约乘数/ * 价格) 平均分配本金
             % 手数经过最小变动单位向下调整
-  
+            
             posHands = getholdinghands(posTradingDirect, posFullDirect, tradingPara.capital / tradingPara.passway);
-       
+            
             targetPortfolio = getMainContName(posHands);
-           
+            
             % targetPortfolio需要做一个调整：
             % 从始至终从来没有被选中过的品种要踢掉。。（不然回测时是一个一个品种测的，测到这个品种没法弄。。）
             % 不要改回测平台，调整自己输入的targetPortfolio符合回测平台的要求（因为平台不是自己写的，为了保持一致）
             
             [BacktestResult,err] = CTABacktest_GeneralPlatform_3(targetPortfolio,tradingPara);
-%             %         figure
-%                     % 净值曲线
-%                                 dn = datenum(num2str(BacktestResult.nv(:, 1)), 'yyyymmdd');
-%                                 plot(dn, ((tradingPara.capital / tradingPara.passway)  + ...
-%                                     BacktestResult.nv(:, 2)) ./ (tradingPara.capital / tradingPara.passway))
-%                                 datetick('x', 'yyyymmdd', 'keepticks', 'keeplimits')
-%                                 hold on
-%             
+            %             %         figure
+            %                     % 净值曲线
+            %                                 dn = datenum(num2str(BacktestResult.nv(:, 1)), 'yyyymmdd');
+            %                                 plot(dn, ((tradingPara.capital / tradingPara.passway)  + ...
+            %                                     BacktestResult.nv(:, 2)) ./ (tradingPara.capital / tradingPara.passway))
+            %                                 datetick('x', 'yyyymmdd', 'keepticks', 'keeplimits')
+            %                                 hold on
+            %
             BacktestAnalysis = CTAAnalysis_GeneralPlatform_2(BacktestResult);
             if jPassway == 1
                 totalRes(:, [1 2]) = BacktestAnalysis;
@@ -170,7 +176,7 @@ for iWin = 1:length(window) % 每个时间窗口
             %         totalBacktestExposure = outerjoin(totalBacktestExposure, array2table(BacktestResult.riskExposure(:, 1:2), 'VariableNames', {'Date', 'Exposure'}), ...
             %             'type', 'left', 'mergekeys', true);
             %         totalBacktestExposure.Properties.VariableNames{jPassway + 1} = ['Exposure', num2str(jPassway)];
-      
+            
         end
         
         % 修改getMainContName函数后，循环通道速度从1条通道38秒提升到10条通道只需要23秒
@@ -206,16 +212,16 @@ for iWin = 1:length(window) % 每个时间窗口
             bcktstAnalysis(:, (iWin - 1) * length(holdingTime) + kHolding + 1) = ...
                 totalBacktestAnalysis(:, 2);
         end
-     
+        
     end
 end
-% 
+%
 % if iDate == 1
 %     dateBacktst(:, [1 2]) = bcktstAnalysis;
 % else
 %     dateBacktst(:, iDate + 1) = BacktestAnalysis(:, 2);
 % end
-% 
+%
 % end
 % % 保存新动量结果
 % bctNV =  totalBacktestResult.nv;
